@@ -10,4 +10,9 @@ def client():
 
 def test_home_page(client):
     response = client.get('/')
-    assert '<h1>Анализатор страниц</h1>' in response.text
+    assert 'Анализатор страниц' in response.text
+
+
+def test_url_page(client):
+    response = client.get('/urls')
+    assert 'Сайты' in response.text
