@@ -25,4 +25,10 @@ PORT ?= 8000
 start:
 	poetry run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
 
-.PHONY: install test lint selfcheck check build dev start
+start-testdb:
+	docker-compose -f docker-compose.test.yml up -d
+
+stop-testdb:
+	docker-compose -f docker-compose.test.yml down
+
+.PHONY: install test lint selfcheck check build dev start start-testdb stop-testdb
