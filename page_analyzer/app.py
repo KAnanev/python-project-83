@@ -1,13 +1,29 @@
+import os
+
+from dotenv import load_dotenv
 from flask import Flask, render_template
 
-app = Flask(__name__)
+load_dotenv()
 
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+def create_app(test_config=None):
+    app = Flask(__name__)
+    app.config.from_mapping(
+        DATABASE_URL=os.getenv('DATABASE_URL')
+    )
 
+    if test_config:
+        app.config.from_mapping(test_config)
 
-@app.route('/urls')
-def urls():
-    return render_template('urls.html')
+    from page_analyzer.db import init_app
+    init_app(app)
+
+    @app.route('/')
+    def index():
+        return render_template('index.html')
+
+    @app.route('/urls')
+    def urls():
+        return render_template('urls.html')
+
+    return app
