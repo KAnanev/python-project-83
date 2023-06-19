@@ -24,6 +24,7 @@ def init_db():
 
     with current_app.open_resource('database.sql') as f:
         db.execute(f.read().decode('utf8'))
+        db.commit()
 
 
 @click.command('init-db')

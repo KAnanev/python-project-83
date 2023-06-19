@@ -18,8 +18,10 @@ def app():
     )
 
     with app.app_context():
+        db = get_db()
         init_db()
-        get_db().execute(_test_data_sql)
+        db.execute(_test_data_sql)
+        db.commit()
 
     yield app
 
