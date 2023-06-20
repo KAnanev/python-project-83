@@ -23,10 +23,6 @@ def create_app(test_config=None):
     _app.register_blueprint(views.bp)
     _app.add_url_rule('/', endpoint='index')
 
-    @_app.route('/urls')
-    def urls():
-        return render_template('urls.html')
-
     return _app
 
 
