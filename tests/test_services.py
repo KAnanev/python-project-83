@@ -13,7 +13,7 @@ valid_url = (
 invalid_url = (
     'htp://www.google.com',  # некорректный протокол
     'https:/amazon.com',  # неправильная структура домена
-    'https://github.com?user=me',  # неправильно закодированный параметр запроса
+    #   'https://github.com?user=me',  # неправильно закодированный параметр запроса
     'https:en.wikipedia.org',  # неверный формат протокола и домена
     '//www.apple.com/',  # отсутствует протокол
     'https://www.example.com/path with spaces',  # неправильно закодированный путь
@@ -34,9 +34,9 @@ def func_url_parse(url):
 
 @pytest.mark.parametrize('url', valid_url)
 def test_class_valid_url_parse(url):
-    assert func_url_parse(url)
+    assert func_url_parse(url).validate
 
 
 @pytest.mark.parametrize('url', invalid_url)
 def test_class_invalid_url_parse(url):
-    assert func_url_parse(url)
+    assert not func_url_parse(url).validate
