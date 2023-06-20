@@ -7,7 +7,7 @@ bp = Blueprint('page_analyzer', __name__)
 
 INSERT_URL_QUERY = 'INSERT INTO urls (name, created_at) VALUES (%s,%s)'
 SELECT_URL_QUERY = 'SELECT * FROM urls WHERE id = (%s)'
-SELECT_URLS_QUERY = 'SELECT * FROM urls'
+SELECT_URLS_QUERY = 'SELECT * FROM urls ORDER BY id DESC'
 
 
 @bp.route('/', methods=('GET', 'POST'))
