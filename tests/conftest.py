@@ -17,7 +17,7 @@ def app():
     app = create_app(
         {
             'TESTING': True,
-            'TEST_DATABASE_URL': os.getenv('TEST_DATABASE_URL')
+            'DATABASE_URL': os.getenv('TEST_DATABASE_URL')
         }
     )
 
