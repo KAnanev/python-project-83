@@ -19,10 +19,16 @@ build: check
 	poetry build
 
 dev:
-	poetry run flask --app page_analyzer:app run
+	poetry run flask --app page_analyzer:app --debug run
 
 PORT ?= 8000
 start:
-	poetry run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
+	poetry run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app && poetry run flask --app page_analyzer:app init-db
 
-.PHONY: install test lint selfcheck check build dev start
+start-testdb:
+	docker-compose -f docker-compose.test.yml up -d
+
+stop-testdb:
+	docker-compose -f docker-compose.test.yml down
+
+.PHONY: install test lint selfcheck check build dev start start-testdb stop-testdb
