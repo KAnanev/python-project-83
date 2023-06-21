@@ -1,5 +1,5 @@
 install:
-	poetry install
+	poetry install --no-dev --no-interactive --no-ansi && pip install psycopg[binary]
 
 test:
 	poetry run pytest
