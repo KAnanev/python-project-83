@@ -39,6 +39,8 @@ jobs:
           pip install poetry
           make install
       - name: Run linter and pytest
+        env:
+          TEST_DATABASE_URL: postgresql://test_user:test_pass@localhost:5433/test_db
         run: |
           make check
       - name: Test & publish code coverage
