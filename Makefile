@@ -1,5 +1,5 @@
 install:
-	poetry install
+	poetry install && poetry run flask --app page_analyzer:app init-db
 
 test:
 	poetry run pytest
