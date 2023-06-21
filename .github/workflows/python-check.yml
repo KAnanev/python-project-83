@@ -2,7 +2,7 @@ name: Python-check
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -13,6 +13,20 @@ jobs:
       matrix:
         # we want to test our package on several versions of Python
         python-version: [3.11]
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -32,6 +46,7 @@ jobs:
         if: github.ref_name == 'main'
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/testdb
         with:
           coverageCommand: make test-coverage
           debug: true
