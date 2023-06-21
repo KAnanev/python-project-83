@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from page_analyzer.db import get_db
-from page_analyzer.services import URLParse, get_date_now, add_url
+from page_analyzer.services import URLParse, add_url
 
 bp = Blueprint('page_analyzer', __name__)
 
-INSERT_URL_QUERY = 'INSERT INTO urls (name, created_at) VALUES (%s,%s) ON CONFLICT DO NOTHING RETURNING id'
+INSERT_URL_QUERY = 'INSERT INTO urls (name, created_at) ' \
+                   'VALUES (%s,%s) ON CONFLICT DO NOTHING RETURNING id'
 SELECT_URL_QUERY = 'SELECT * FROM urls WHERE id = (%s)'
 SELECT_URLS_QUERY = 'SELECT * FROM urls ORDER BY id DESC'
 

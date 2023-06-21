@@ -6,9 +6,12 @@ from psycopg.rows import dict_row
 
 
 def get_db():
-    """Функция проверяет наличие объекта соединения с базой данных в контексте приложения Flask"""
+    """Функция проверяет наличие объекта соединения
+    с базой данных в контексте приложения Flask"""
     if 'db' not in g:
-        g.db = psycopg.connect(current_app.config['DATABASE_URL'], row_factory=dict_row)
+        g.db = psycopg.connect(
+            current_app.config['DATABASE_URL'], row_factory=dict_row
+        )
     return g.db
 
 
