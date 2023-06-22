@@ -47,7 +47,7 @@ def check_url(normalized_url, db):
     return url_id
 
 
-def add_url(normalized_url, db):
+def add_or_get_url(normalized_url, db):
     """Добвляем урл или возвращаем его id"""
 
     url_id = check_url(normalized_url, db)
