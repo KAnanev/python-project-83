@@ -50,6 +50,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           TEST_DATABASE_URL: postgresql://test_user:test_pass@localhost:5433/test_db
+          SECRET_KEY: supersecret
         with:
           coverageCommand: make test-coverage
           debug: true
