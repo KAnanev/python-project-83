@@ -14,6 +14,7 @@
     </thead>
     <tbody>
 
+    {% if urls %}
     {% for url in urls %}
     <tr>
           <td>{{ url.id }}</td>
@@ -26,6 +27,7 @@
           <td></td>
     </tr>
     {% endfor %}
+    {% endif %}
 
     </tbody>
   </table>
