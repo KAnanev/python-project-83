@@ -31,4 +31,7 @@ start-testdb:
 stop-testdb:
 	docker-compose -f docker-compose.test.yml down
 
-.PHONY: install test lint selfcheck check build dev start start-testdb stop-testdb
+init_db:
+	poetry run flask --app page_analyzer:app init-db
+
+.PHONY: install test lint selfcheck check build dev start start-testdb stop-testdb init_db
