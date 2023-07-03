@@ -25,8 +25,7 @@ def app():
     with app.app_context():
         db = get_db()
         init_db()
-        db.execute(_test_data_sql)
-        db.commit()
+        db.execute_query(_test_data_sql)
 
     yield app
 

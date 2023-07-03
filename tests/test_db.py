@@ -10,6 +10,6 @@ def test_get_close_db(app):
         assert db is get_db()
 
     with pytest.raises(psycopg.OperationalError) as error:
-        db.execute('SELECT 1')
+        db.execute_query('SELECT 1')
 
     assert 'closed' in str(error.value)
