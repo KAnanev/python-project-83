@@ -13,3 +13,11 @@ def test_get_close_db(app):
         db.execute_query('SELECT 1')
 
     assert 'closed' in str(error.value)
+
+
+def test_get_data_db(app):
+    with app.app_context():
+        db = get_db()
+        result = db.execute_query('select * from urls;')
+        assert result[0]['id'] == 1
+        assert result[1]['id'] == 2

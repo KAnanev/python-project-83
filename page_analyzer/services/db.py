@@ -1,6 +1,6 @@
 import psycopg
 import logging
-from typing import Optional
+from typing import Optional, List, Tuple, Any
 
 from psycopg.rows import dict_row
 
@@ -11,7 +11,7 @@ class PostgresDB:
         self.logger = logging.getLogger(__name__)
 
         try:
-            self.connect = psycopg.connect(dsn,  row_factory=dict_row)
+            self.connection = psycopg.connect(dsn, row_factory=dict_row)
         except Exception as e:
             self.logger.error(f"Ошибка при подключении к базе данных: {str(e)}")
 
@@ -19,37 +19,36 @@ class PostgresDB:
 
         """Закрывает соединение с базой данных"""
 
-        self.connect.close()
+        self.connection.close()
         self.logger.info("Соединение с базой данных закрыто")
 
-    def raw_execute(self, query: str) -> None:
-        connect = self.connect
-        try:
-            connect.execute(query)
-            connect.commit()
-        except Exception as e:
-            self.logger.error(f"Ошибка при выполнении запроса: {str(e)}")
-            connect.rollback()
+    def execute_query(self,
+                      query: str,
+                      params: Optional[tuple] = None,
+                      commit: bool = False) -> Optional[list[Any]]:
+        """Запрос к бд"""
 
-    def execute_query(
-            self, query: str,
-            params: Optional[tuple] = None,
-            commit: bool = False
-    ) -> Optional[list]:
-        """Выполняет SQL-запрос к базе данных"""
-
-        connect = self.connect
+        result = None
+        cursor = self.connection.cursor()
 
         try:
-            result = connect.execute(query, params).fetchall()
+            cursor.execute(query, params)
+
+            if cursor.description:
+                result = cursor.fetchall()
+
             if commit:
-                connect.commit()
-            return result
-        except Exception as e:
+                self.connection.commit()
+
+        except psycopg.Error as e:
             self.logger.error(f"Ошибка при выполнении запроса: {str(e)}")
-            connect.rollback()
-            return None
+
+        finally:
+            if cursor:
+                cursor.close()
+
+        return result
 
     def is_closed(self):
-        if self.connect:
-            return self.connect.closed
+        if self.connection:
+            return self.connection.closed
