@@ -22,6 +22,15 @@ class PostgresDB:
         self.connect.close()
         self.logger.info("Соединение с базой данных закрыто")
 
+    def raw_execute(self, query: str) -> None:
+        connect = self.connect
+        try:
+            connect.execute(query)
+            connect.commit()
+        except Exception as e:
+            self.logger.error(f"Ошибка при выполнении запроса: {str(e)}")
+            connect.rollback()
+
     def execute_query(
             self, query: str,
             params: Optional[tuple] = None,
