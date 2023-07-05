@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Union
 from urllib.parse import urlparse
 
 import validators
@@ -18,12 +18,12 @@ class URLModel(BaseModel):
     name: str = Field(max_length=URL_MAX_LENGTH)
 
     @field_validator('name')
-    def validate_url(cls, value: str) -> str:
+    def validate_url(cls, value: str) -> str | None:
 
         if validators.url(value):
             url = urlparse(value)
             return f'{url.scheme}://{url.netloc}'.lower()
-        raise ValueError('Некорректный URL')
+        return None
 
 
 class URLChecks(URLBaseMixin):
@@ -36,3 +36,8 @@ class URLChecks(URLBaseMixin):
 
 class URLSModel(URLBaseMixin, URLModel):
     url_checks: Optional[List[URLChecks]] = []
+
+    @field_validator('url_checks')
+    def validate_url_checks(cls, value: List) -> List[Dict[str, Union[str, int]]]:
+        value.sort(key=lambda x: -x.id)
+        return value
