@@ -1,10 +1,11 @@
 from urllib.parse import urlparse
 
 import validators
-
-from typing import Dict, Any, List
+from page_analyzer.models import URLModel, URLSModel
+from typing import Dict, Any, List, Optional
 from psycopg import Connection
 
+from page_analyzer.services.db import PostgresDB
 from page_analyzer.services.utils import get_date_now
 
 GET_ITEMS = 'SELECT * FROM urls'
@@ -19,6 +20,26 @@ FROM urls
 LEFT JOIN url_checks ON urls.id = url_checks.url_id
 WHERE urls.id = (%s)
 '''
+
+GET_JSON_BY_ID = """SELECT 
+    json_build_object(
+        'id', urls.id,
+        'name', urls.name,
+        'created_at', urls.created_at,
+        'url_checks', COALESCE(json_agg(json_build_object(
+            'id', url_checks.id,
+            'url_id', url_checks.url_id,
+            'status_code', url_checks.status_code,
+            'h1', url_checks.h1,
+            'title', url_checks.title,
+            'description', url_checks.description,
+            'created_at', url_checks.created_at
+        )) FILTER (WHERE url_checks.id IS NOT NULL) , '[]'::json)
+    ) AS result
+FROM urls 
+LEFT JOIN url_checks ON urls.id = url_checks.url_id
+WHERE urls.id = (%s)
+GROUP BY urls.id;"""
 
 GET_ITEM_BY_ID_ = '''
 SELECT 
@@ -35,67 +56,46 @@ URL_MAX_LENGTH = 255
 
 
 class URLService:
-    def __init__(self, db: Connection[Dict[str, Any]]):
+    def __init__(self, db: PostgresDB):
         self.db = db
 
-    @staticmethod
-    def validate_url(url: str):
-        return all(
-            [
-                validators.url(url), validators.length(url, max=URL_MAX_LENGTH)
-            ]
-        )
-
-    @staticmethod
-    def normalize_url(url: str):
-        url = urlparse(url)
-        return f'{url.scheme}://{url.netloc}'.lower()
-
-    def _get_item_by_url(self, url: str) -> Dict[str, Any] | None:
-        item = self.db.execute(
-            GET_ITEM_BY_URL,
-            (self.normalize_url(url),)
-        ).fetchone()
-        return item
-
-    def get_item_by_id(self, url_id: int) -> Dict[str, Any] | None:
-        item = self.db.execute(GET_ITEM_BY_ID_, (url_id,)).fetchall()
+    def get_json_by_id(self, url_id: int):
+        item = self.db.execute_query(GET_JSON_BY_ID, (url_id,), )
         if not item:
             return None
         return item
 
-    def get_all_items(self) -> List[Dict[str, Any]] | None:
-        items = self.db.execute(GET_ITEMS).fetchall()
-        if not items:
+    def _get_url_by_name(self, url: URLModel) -> list[Any] | None:
+        item = self.db.execute_query(GET_ITEM_BY_URL, (url.name,), )
+        if not item:
             return None
-        return sorted(items, key=lambda x: -x['id'])
+        return item
 
-    def insert_item(self, url: str) -> Dict[str, Any]:
+    def get_url_by_id(self, url_id: int) -> Dict[str, Any] | None:
+        item = self.db.execute_query(GET_ITEM_BY_ID_, (url_id,))
 
+        return item
+
+    def get_all_urls(self) -> List[Dict[str, Any]] | None:
+        items = self.db.execute_query(GET_ITEMS)
+        if items:
+            items = sorted(items, key=lambda x: -x['id'])
+        return items
+
+    def insert_url(self, url: URLModel) -> Dict[str, Any]:
         result = {
-            'item': None,
-            'message': ('Некорректный URL', 'danger')
+            'item': self._get_url_by_name(url),
+            'message': ('Страница уже существует', 'info')
         }
 
-        if self.validate_url(url):
-            result['item'] = self._get_item_by_url(self.normalize_url(url))
-            result['message'] = ('Страница уже существует', 'info')
-
-            if not result['item']:
-                result['item'] = self.db.execute(
-                    INSERT_ITEM,
-                    (
-                        self.normalize_url(url),
-                        get_date_now()
-                    )
-                ).fetchone()
-                self.db.commit()
-                result['message'] = ('Страница успешно добавлена', 'success')
+        if not result['item']:
+            result['item'] = self.db.execute_query(INSERT_ITEM, (url.name, get_date_now()), commit=True)
+            result['message'] = ('Страница успешно добавлена', 'success')
 
         return result
 
     def check_url(self, url_id: int) -> Dict[str, Any]:
-        item = self.get_item_by_id(url_id)
+        item = self.get_url_by_id(url_id)
         ctx = {
             'url_id': item['url_id'],
             'status_code': '',
@@ -108,7 +108,7 @@ class URLService:
 
     def insert_item_in_url_checks(self, url_id: int):
         check_url = self.check_url(url_id)
-        self.db.execute(
+        self.db.execute_query(
             '''INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at)
             VALUES (%(url_id)s, %(status_code)s, %(h1)s, %(title)s, %(description)s, %(created_at)s);
             ''',
@@ -122,5 +122,4 @@ class URLService:
 
             }
         )
-        self.db.commit()
         return 'Страница успешно добавлена', 'success'
