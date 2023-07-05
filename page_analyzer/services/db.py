@@ -1,6 +1,6 @@
 import psycopg
 import logging
-from typing import Optional, List, Tuple, Any
+from typing import Optional, List, Tuple, Any, Union, Dict
 
 from psycopg.rows import dict_row
 
@@ -24,30 +24,31 @@ class PostgresDB:
 
     def execute_query(self,
                       query: str,
-                      params: Optional[tuple] = None,
-                      commit: bool = False) -> Optional[list[Any]]:
+                      params: List[Tuple[str, str]] = None,
+                      commit: bool = False,
+                      many: bool = False) -> Union[List[Dict[str, Any]], Dict[str, Any], None]:
         """Запрос к бд"""
 
         result = None
-        cursor = self.connection.cursor()
 
-        try:
-            cursor.execute(query, params)
+        with self.connection.cursor() as cursor:
 
-            if cursor.description:
-                result = cursor.fetchall()
+            try:
+                cursor.execute(query, params)
 
-            if commit:
-                self.connection.commit()
+                if cursor.description:
+                    if many:
+                        result = cursor.fetchall()
+                    else:
+                        result = cursor.fetchone()
 
-        except psycopg.Error as e:
-            self.logger.error(f"Ошибка при выполнении запроса: {str(e)}")
+                if commit:
+                    self.connection.commit()
 
-        finally:
-            if cursor:
-                cursor.close()
+            except Exception as e:
+                self.logger.error(f"Ошибка при выполнении запроса: {str(e)}")
 
-        return result
+            return result
 
     def is_closed(self):
         if self.connection:
