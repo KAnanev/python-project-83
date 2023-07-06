@@ -32,13 +32,6 @@ LEFT JOIN url_checks ON urls.id = url_checks.url_id
 WHERE urls.id = (%s)
 GROUP BY urls.id;"""
 
-GET_ITEM_BY_ID_ = '''
-SELECT 
-urls, url_checks
-FROM urls 
-LEFT JOIN url_checks ON urls.id = url_checks.url_id
-WHERE urls.id = (%s)
-'''
 
 GET_JSON_BY_URL = """SELECT
     json_build_object(
@@ -70,7 +63,6 @@ class URLService:
 
     def get_all_urls(self) -> List[URLModel] | None:
         items = self.db.execute_query(GET_ITEMS, many=True)
-        print(items)
         if items:
             sorted_items = sorted(items, key=lambda item: -item['result']['id'])
             items = list(map(lambda item: URLModel(**item['result']), sorted_items))
