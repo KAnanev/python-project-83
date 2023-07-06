@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List, Dict, Union, Type
 from urllib.parse import urlparse
 
@@ -11,7 +12,7 @@ URL_MAX_LENGTH = 255
 
 class URLBaseMixin(BaseModel):
     id: Optional[int] = None
-    created_at: str = Field(default_factory=get_date_now)
+    created_at: datetime = Field(default_factory=get_date_now)
 
 
 class URLModel(URLBaseMixin):
