@@ -5,7 +5,7 @@ from typing import Optional, List, Tuple, Any, Union, Dict
 from psycopg.rows import dict_row
 
 
-class PostgresDB:
+class PostgresDB:  # TODO: Написать тесты
     def __init__(self, dsn):
 
         self.logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class PostgresDB:
 
     def execute_query(self,
                       query: str,
-                      params: List[Tuple[str, str]] = None,
+                      params: Tuple[Any, ...] = None,
                       commit: bool = False,
                       many: bool = False) -> Union[List[Dict[str, Any]], Dict[str, Any], None]:
         """Запрос к бд"""

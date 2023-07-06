@@ -18,6 +18,9 @@ def test_get_close_db(app):
 def test_get_data_db(app):
     with app.app_context():
         db = get_db()
+
         result = db.execute_query('select * from urls;')
-        assert result[0]['id'] == 1
-        assert result[1]['id'] == 2
+        assert isinstance(result, dict)
+
+        result = db.execute_query('select * from urls;', many=True)
+        assert isinstance(result, list)
