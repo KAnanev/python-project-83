@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, g
 
-
+from page_analyzer.db import get_db
 from page_analyzer.services.url import URLService
 
 bp = Blueprint('page_analyzer', __name__)
@@ -17,11 +17,11 @@ def index():
 def get_urls():
     """Страница со всеми url."""
 
-    db = g.get('my_db')
+    db = get_db()
     url_service = URLService(db=db)
-    items = url_service.get_all_items()
+    items = url_service.get_all_urls()
 
-    return render_template('urls.html', urls=items)
+    return render_template('urls.html', items=items)
 
 
 @bp.post('/urls')
@@ -30,22 +30,17 @@ def post_url():
     добавляет в базу или берет из базы существующий,
     редиректит на страницу с url."""
 
-    db = g.get('my_db')
-
     url = request.form['url']
-
+    db = get_db()
     url_service = URLService(db=db)
-
-    result = url_service.insert_item(url)
+    result = url_service.insert_url(url)
     flash(*result['message'])
-
     if result['item']:
         return redirect(
             url_for(
                 'page_analyzer.get_url',
-                url_id=result['item']['id']),
-        )
-
+                url_id=result['item'].id),
+            )
     return redirect(url_for('index'))
 
 
@@ -53,16 +48,7 @@ def post_url():
 def get_url(url_id):
     """Страница c url с выдачей по id."""
 
-    db = g.get('my_db')
+    db = get_db()
     url_service = URLService(db=db)
-    item = url_service.get_item_by_id(url_id)
-    print(item)
+    item = url_service.get_json_by_id(url_id)
     return render_template('url.html', item=item)
-
-
-@bp.post('/urls/<int:url_id>/checks')
-def check_url(url_id):
-    db = g.get('my_db')
-    url_service = URLService(db=db)
-    message = url_service.insert_item_in_url_checks(url_id)
-    flash(*message)
