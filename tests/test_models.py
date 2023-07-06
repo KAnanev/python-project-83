@@ -47,11 +47,11 @@ def test_invalid_url_model_parse(url):
 
 def test_model_urls_parse():
     valid_data = {'id': '1', 'created_at': '2023-07-04 10:07:29', 'name': 'https://www.google.com/'}
-    URLSModel(**valid_data)
+    assert URLSModel(**valid_data)
     valid_data = {'created_at': '2023-07-04 10:07:29', 'name': 'https://www.google.com/'}
-    URLSModel(**valid_data)
+    assert URLSModel(**valid_data)
     valid_data = {'name': 'https://www.google.com/'}
-    URLSModel(**valid_data)
+    assert URLSModel(**valid_data)
 
 
 
