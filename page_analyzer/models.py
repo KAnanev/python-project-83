@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Union
+from typing import Optional, List, Dict, Union, Type
 from urllib.parse import urlparse
 
 import validators
@@ -14,16 +14,16 @@ class URLBaseMixin(BaseModel):
     created_at: str = Field(default_factory=get_date_now)
 
 
-class URLModel(BaseModel):
+class URLModel(URLBaseMixin):
     name: str = Field(max_length=URL_MAX_LENGTH)
 
     @field_validator('name')
-    def validate_url(cls, value: str) -> str | None:
+    def validate_url(cls, value: str) -> str:
 
-        if validators.url(value):
-            url = urlparse(value)
-            return f'{url.scheme}://{url.netloc}'.lower()
-        return None
+        if not validators.url(value):
+            raise ValueError('Invalid url address')
+        url = urlparse(value)
+        return f'{url.scheme}://{url.netloc}'.lower()
 
 
 class URLChecks(URLBaseMixin):
@@ -34,7 +34,7 @@ class URLChecks(URLBaseMixin):
     description: Optional[str] = None
 
 
-class URLSModel(URLBaseMixin, URLModel):
+class URLSModel(URLModel):
     url_checks: Optional[List[URLChecks]] = []
 
     @field_validator('url_checks')
