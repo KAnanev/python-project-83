@@ -23,7 +23,7 @@
 
 <h2 class="mt-5 mb-3">Проверки</h2>
 
-<form method="post" action="">
+<form method="post" action="{{ url_for('page_analyzer.post_url_check', url_id=item.id) }}">
   <input type="submit" class="btn btn-primary" value="Запустить проверку">
 </form>
 
