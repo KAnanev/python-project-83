@@ -5,7 +5,7 @@ from typing import Optional, List, Tuple, Any, Union, Dict
 from psycopg.rows import dict_row
 
 
-class PostgresDB:  # TODO: Написать тесты
+class PostgresDB:
     def __init__(self, dsn):
 
         self.logger = logging.getLogger(__name__)
