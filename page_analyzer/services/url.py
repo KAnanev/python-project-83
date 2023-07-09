@@ -65,7 +65,7 @@ class URLService:
         items = self.db.execute_query(GET_ITEMS, many=True)
         if items:
             sorted_items = sorted(items, key=lambda item: -item['result']['id'])
-            items = list(map(lambda item: URLModel(**item['result']), sorted_items))
+            items = [URLModel(**item['result']) for item in sorted_items]
         return items
 
     def _get_url_id_by_url_name(self, item: URLModel) -> Optional[URLModel]:
