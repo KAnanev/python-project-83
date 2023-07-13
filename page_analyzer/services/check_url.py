@@ -36,19 +36,30 @@ class CheckURLService:
         url_service = URLService(self.db)
         url = url_service.get_json_by_id(url_id).name
         if url:
-            response = requests.get(url)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            h1_tag = soup.find('h1').text if soup.find('h1') else None
-            title = soup.find('title').text if soup.find('title') else None
-            description_tag = soup.find('meta', attrs={'name': 'description'})
-
-            description = description_tag[
-                'content'] if description_tag else None
+            response = self.response_check(url)
             if response:
                 return URLChecks(
                     url_id=url_id,
-                    status_code=response.status_code,
-                    h1=h1_tag,
-                    title=title,
-                    description=description,
+                    status_code=response['status_code'],
+                    h1=response['h1'],
+                    title=response['title'],
+                    description=response['description'],
                 )
+
+    @staticmethod
+    def response_check(url):
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        h1_tag = soup.find('h1').text if soup.find('h1') else None
+        title = soup.find('title').text if soup.find('title') else None
+        description_tag = soup.find('meta', attrs={'name': 'description'})
+
+        description = description_tag[
+            'content'] if description_tag else None
+
+        return {
+            'status_code': response.status_code,
+            'h1': h1_tag,
+            'title': title,
+            'description': description,
+        }
