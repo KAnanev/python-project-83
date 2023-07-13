@@ -66,7 +66,7 @@ class URLService:
             items = [URLModel(**item['result']) for item in sorted_items]
         return items
 
-    def _get_url_id_by_url_name(self, item: URLModel) -> Optional[URLModel]:
+    def get_url_id_by_url_name(self, item: URLModel) -> Optional[URLModel]:
 
         exist_item = self.db.execute_query(GET_JSON_BY_URL, (item.name,), )
         if exist_item:
@@ -79,7 +79,7 @@ class URLService:
 
         try:
             item = URLModel(name=url)
-            item = self._get_url_id_by_url_name(item)
+            item = self.get_url_id_by_url_name(item)
 
             if item.id:
                 message = ('Страница уже существует', 'info')

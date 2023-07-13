@@ -76,6 +76,7 @@ def test_post_url_check(client):
 
     response = client.post('/urls/1/checks', follow_redirects=True)
     assert '5' in response.text
+    assert '200' in response.text
 
     response = client.post('/urls/1/checks', follow_redirects=True)
     assert '6' in response.text
