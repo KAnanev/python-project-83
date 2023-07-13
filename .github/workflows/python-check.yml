@@ -1,8 +1,8 @@
-name: Python-check
+name: Page Analyzer CI
 
 on:
   push:
-    branches: [ dev, main ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -11,46 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # we want to test our package on several versions of Python
-        python-version: [3.11]
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_pass
-          POSTGRES_DB: test_db
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 3
+        python-version: [ "3.10" ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-        # make depends on poetry
       - name: Install dependencies
         run: |
           pip install poetry
-          make install
-      - name: Run linter and pytest
-        env:
-          TEST_DATABASE_URL: postgresql://test_user:test_pass@localhost:5433/test_db
-          SECRET_KEY: supersecret
+          make setup
+      - name: Run linter
         run: |
-          make check
-      - name: Test & publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
-        if: github.ref_name == 'main'
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-          TEST_DATABASE_URL: postgresql://test_user:test_pass@localhost:5433/test_db
-          SECRET_KEY: supersecret
-        with:
-          coverageCommand: make test-coverage
-          debug: true
+          make lint

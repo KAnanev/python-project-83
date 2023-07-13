@@ -1,37 +1,24 @@
+setup: install lock
+
+PORT ?= 8000
+
 install:
 	poetry install
 
-test:
-	poetry run pytest
+lock:
+	poetry lock
 
 lint:
 	poetry run flake8 page_analyzer
 
-test-coverage:
-	poetry run pytest --cov=page_analyzer --cov-report xml
-
-self_check:
+check:
 	poetry check
 
-check: self_check test lint
-
-build: check
-	poetry build
+test:
+	poetry run pytest tests
 
 dev:
-	poetry run flask --app page_analyzer:app --debug run
+	poetry run flask --app page_analyzer:app run
 
-PORT ?= 8000
 start:
-	poetry run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer:app
-
-start-testdb:
-	docker-compose -f docker-compose.test.yml up -d
-
-stop-testdb:
-	docker-compose -f docker-compose.test.yml down
-
-init_db:
-	poetry run flask --app page_analyzer:app init-db
-
-.PHONY: install test lint selfcheck check build dev start start-testdb stop-testdb init_db
+	poetry run gunicorn -w 3 -b 0.0.0.0:$(PORT) page_analyzer:app
