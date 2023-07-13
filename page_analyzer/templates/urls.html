@@ -23,8 +23,15 @@
               {{ item.name }}
             </a>
           </td>
+          {% if item.url_checks %}
+          {% for url_checks in item.url_checks %}
+          <td>{{ url_checks.created_at }}</td>
+          <td>{{ url_checks.status_code }}</td>
+          {% endfor %}
+          {% else %}
           <td></td>
           <td></td>
+          {% endif %}
     </tr>
     {% endfor %}
     {% endif %}
