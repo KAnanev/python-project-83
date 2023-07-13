@@ -14,18 +14,20 @@
     </thead>
     <tbody>
 
-    {% for url in urls %}
+    {% if items %}
+    {% for item in items %}
     <tr>
-          <td>{{ url.id }}</td>
+          <td>{{ item.id }}</td>
           <td>
-            <a href="{{ url_for('page_analyzer.get_url', url_id=url.id) }}">
-              {{ url.name }}
+            <a href="{{ url_for('page_analyzer.get_url', url_id=item.id) }}">
+              {{ item.name }}
             </a>
           </td>
           <td></td>
           <td></td>
     </tr>
     {% endfor %}
+    {% endif %}
 
     </tbody>
   </table>

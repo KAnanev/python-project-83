@@ -1,6 +1,8 @@
 import pytest
+from pydantic_core._pydantic_core import ValidationError
 
-from page_analyzer.services import URLParse
+from page_analyzer.models import URLModel, URLSModel
+
 
 valid_url = (
     'https://www.google.com/',
@@ -28,15 +30,29 @@ invalid_url = (
 
 
 def func_url_parse(url):
-    url_parse = URLParse(url)
+    url_parse = URLModel(name=url)
     return url_parse
 
 
 @pytest.mark.parametrize('url', valid_url)
-def test_class_valid_url_parse(url):
-    assert func_url_parse(url).validate
+def test_valid_url_model_parse(url):
+    assert func_url_parse(url)
 
 
 @pytest.mark.parametrize('url', invalid_url)
-def test_class_invalid_url_parse(url):
-    assert not func_url_parse(url).validate
+def test_invalid_url_model_parse(url):
+    with pytest.raises(ValidationError):
+        assert not func_url_parse(url)
+
+
+def test_model_urls_parse():
+    valid_data = {'id': '1', 'created_at': '2023-07-04 10:07:29', 'name': 'https://www.google.com/'}
+    assert URLSModel(**valid_data)
+    valid_data = {'created_at': '2023-07-04 10:07:29', 'name': 'https://www.google.com/'}
+    assert URLSModel(**valid_data)
+    valid_data = {'name': 'https://www.google.com/'}
+    assert URLSModel(**valid_data)
+
+
+
+

@@ -1,5 +1,3 @@
-from flask import url_for
-
 def test_index(client):
     response = client.get('/')
     assert response.status_code == 200
@@ -21,6 +19,7 @@ def test_url(client):
     response = client.get('/urls/1')
     assert 'http://www.ya.ru' in response.text
     assert '1' in response.text
+    assert 'data-test="checks"' in response.text
 
     response = client.get('/urls/2')
     assert 'http://www.google.ru' in response.text
@@ -67,3 +66,19 @@ def test_post_url_invalid_url(client):
         'url': 'htps://habr.com'
     }, follow_redirects=True)
     assert 'Некорректный URL' in response.text
+
+
+def test_post_url_check(client):
+    response = client.post('/urls/1/checks')
+
+    assert response.status_code == 302
+    assert response.location == '/urls/1'
+
+    response = client.post('/urls/1/checks', follow_redirects=True)
+    assert '5' in response.text
+
+    response = client.post('/urls/1/checks', follow_redirects=True)
+    assert '6' in response.text
+
+    response = client.post('/urls/2/checks', follow_redirects=True)
+    assert '7' in response.text

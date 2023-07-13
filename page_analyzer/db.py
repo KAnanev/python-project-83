@@ -1,17 +1,15 @@
-import psycopg
 import click
 
 from flask import current_app, g
-from psycopg.rows import dict_row
+
+from page_analyzer.services.db import PostgresDB
 
 
 def get_db():
     """Функция проверяет наличие объекта соединения
     с базой данных в контексте приложения Flask"""
     if 'db' not in g:
-        g.db = psycopg.connect(
-            current_app.config['DATABASE_URL'], row_factory=dict_row
-        )
+        g.db = PostgresDB(current_app.config['DATABASE_URL'])
     return g.db
 
 
@@ -26,8 +24,7 @@ def init_db():
     db = get_db()
 
     with current_app.open_resource('database.sql') as f:
-        db.execute(f.read().decode('utf8'))
-        db.commit()
+        db.execute_query(f.read().decode('utf8'))
 
 
 @click.command('init-db')
