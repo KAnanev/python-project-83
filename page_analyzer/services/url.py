@@ -80,7 +80,6 @@ class URLService:
         items = self.db.execute_query(GET_ITEMS, many=True)
         if items:
             sorted_items = sorted(items, key=lambda item: -item['result']['id'])
-            print(sorted_items)
             items = [URLSModel(**item['result']) for item in sorted_items]
         return items
 
