@@ -1,5 +1,9 @@
 import logging
 
+import requests
+
+from page_analyzer.services.url import URLService
+
 from page_analyzer.models import URLChecks
 from page_analyzer.services.db import PostgresDB
 
@@ -28,6 +32,10 @@ class CheckURLService:
             return 'Страница успешно проверена', 'success'
         return 'Произошла ошибка при проверке', 'danger'
 
-    @staticmethod
-    def check_url(url_id):
-        return URLChecks(url_id=url_id)
+    def check_url(self, url_id):
+        url_service = URLService(self.db)
+        url = url_service.get_json_by_id(url_id).name
+        if url:
+            request = requests.get(url)
+            if request:
+                return URLChecks(url_id=url_id, status_code=request.status_code)

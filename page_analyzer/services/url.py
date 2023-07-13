@@ -4,12 +4,29 @@ from page_analyzer.models import URLModel, URLSModel
 from page_analyzer.services.db import PostgresDB
 
 GET_ITEMS = """SELECT
-     json_build_object(
-            'id', id,
-            'name', name,
-            'created_at', created_at
-) AS result
-FROM urls;"""
+    json_build_object(
+        'id', urls.id,
+        'name', urls.name,
+        'created_at', urls.created_at,
+        'url_checks', COALESCE(json_agg(json_build_object(
+            'id', latest_url_checks.id,
+            'url_id', latest_url_checks.url_id,
+            'status_code', latest_url_checks.status_code,
+            'h1', latest_url_checks.h1,
+            'title', latest_url_checks.title,
+            'description', latest_url_checks.description,
+            'created_at', latest_url_checks.created_at
+        )) FILTER (WHERE latest_url_checks.id IS NOT NULL), '[]'::json)
+    ) AS result
+FROM urls
+LEFT JOIN LATERAL (
+    SELECT *
+    FROM url_checks
+    WHERE url_checks.url_id = urls.id
+    ORDER BY url_checks.created_at DESC
+    LIMIT 1
+) AS latest_url_checks ON true
+GROUP BY urls.id;"""
 
 GET_JSON_BY_ID = """SELECT
     json_build_object(
@@ -63,10 +80,11 @@ class URLService:
         items = self.db.execute_query(GET_ITEMS, many=True)
         if items:
             sorted_items = sorted(items, key=lambda item: -item['result']['id'])
-            items = [URLModel(**item['result']) for item in sorted_items]
+            print(sorted_items)
+            items = [URLSModel(**item['result']) for item in sorted_items]
         return items
 
-    def _get_url_id_by_url_name(self, item: URLModel) -> Optional[URLModel]:
+    def get_url_id_by_url_name(self, item: URLModel) -> Optional[URLModel]:
 
         exist_item = self.db.execute_query(GET_JSON_BY_URL, (item.name,), )
         if exist_item:
@@ -79,7 +97,7 @@ class URLService:
 
         try:
             item = URLModel(name=url)
-            item = self._get_url_id_by_url_name(item)
+            item = self.get_url_id_by_url_name(item)
 
             if item.id:
                 message = ('Страница уже существует', 'info')

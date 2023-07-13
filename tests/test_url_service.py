@@ -46,11 +46,11 @@ def test__get_url_id_by_url_name(app):
         db = get_db()
         url_service = URLService(db=db)
         item = URLModel(name='https://chatbot.theb.ai')
-        data = url_service._get_url_id_by_url_name(item)
+        data = url_service.get_url_id_by_url_name(item)
         assert not data.id
 
         item = URLModel(name='http://www.ya.ru/')
-        data = url_service._get_url_id_by_url_name(item)
+        data = url_service.get_url_id_by_url_name(item)
         assert data.id
 
 
