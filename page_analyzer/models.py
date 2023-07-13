@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Dict, Union, Type
+from typing import Optional, List, Dict, Union
 from urllib.parse import urlparse
 
 import validators
@@ -39,6 +39,8 @@ class URLSModel(URLModel):
     url_checks: Optional[List[URLChecks]] = []
 
     @field_validator('url_checks')
-    def validate_url_checks(cls, value: List) -> List[Dict[str, Union[str, int]]]:
+    def validate_url_checks(cls, value: List) -> List[
+        Dict[str, Union[str, int]]
+    ]:
         value.sort(key=lambda x: -x.id)
         return value

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, g
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from page_analyzer.db import get_db
 from page_analyzer.services.check_url import CheckURLService

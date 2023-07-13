@@ -1,8 +1,7 @@
-from typing import Dict, Any, List, Optional, Tuple
+from typing import List, Optional
 
 from page_analyzer.models import URLModel, URLSModel
 from page_analyzer.services.db import PostgresDB
-from page_analyzer.services.utils import get_date_now
 
 GET_ITEMS = """SELECT
      json_build_object(
@@ -12,7 +11,7 @@ GET_ITEMS = """SELECT
 ) AS result
 FROM urls;"""
 
-GET_JSON_BY_ID = """SELECT 
+GET_JSON_BY_ID = """SELECT
     json_build_object(
         'id', urls.id,
         'name', urls.name,
@@ -27,11 +26,10 @@ GET_JSON_BY_ID = """SELECT
             'created_at', url_checks.created_at
         )) FILTER (WHERE url_checks.id IS NOT NULL) , '[]'::json)
     ) AS result
-FROM urls 
+FROM urls
 LEFT JOIN url_checks ON urls.id = url_checks.url_id
 WHERE urls.id = (%s)
 GROUP BY urls.id;"""
-
 
 GET_JSON_BY_URL = """SELECT
     json_build_object(
@@ -87,7 +85,11 @@ class URLService:
                 message = ('Страница уже существует', 'info')
 
             else:
-                raw_item = self.db.execute_query(INSERT_ITEM_RETURN_JSON, (item.name, item.created_at), commit=True)
+                raw_item = self.db.execute_query(
+                    INSERT_ITEM_RETURN_JSON,
+                    (item.name, item.created_at),
+                    commit=True
+                )
                 item = URLModel(**raw_item['result'])
                 message = ('Страница успешно добавлена', 'success')
         except ValueError:

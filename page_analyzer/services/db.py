@@ -1,7 +1,7 @@
-import psycopg
 import logging
-from typing import Optional, List, Tuple, Any, Union, Dict
+from typing import List, Tuple, Any, Union, Dict
 
+import psycopg
 from psycopg.rows import dict_row
 
 
@@ -22,33 +22,34 @@ class PostgresDB:
         self.connection.close()
         self.logger.info("Соединение с базой данных закрыто")
 
-    def execute_query(self,
-                      query: str,
-                      params: Tuple[Any, ...] = None,
-                      commit: bool = False,
-                      many: bool = False) -> Union[List[Dict[str, Any]], Dict[str, Any], None]:
+    def cursor(self):
         """Запрос к бд"""
 
-        result = None
+        return self.connection.cursor()
 
-        with self.connection.cursor() as cursor:
+    def _execute(self, query, params):
+        return self.cursor().execute(query, params)
 
-            try:
-                cursor.execute(query, params)
+    def execute_query(
+            self,
+            query: str,
+            params: Tuple[Any, ...] = None,
+            many=False,
+            commit=False
+    ) -> Union[List[Dict[str, Any]], Dict[str, Any], None]:
 
-                if cursor.description:
-                    if many:
-                        result = cursor.fetchall()
-                    else:
-                        result = cursor.fetchone()
+        result = self._execute(query, params)
 
-                if commit:
-                    self.connection.commit()
+        if result.description:
+            if many:
+                result = result.fetchall()
+            else:
+                result = result.fetchone()
 
-            except Exception as e:
-                self.logger.error(f"Ошибка при выполнении запроса: {str(e)}")
+        if commit:
+            self.connection.commit()
 
-            return result
+        return result
 
     def is_closed(self):
         if self.connection:
