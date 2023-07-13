@@ -17,6 +17,7 @@ psycopg-c = "^3.1.9"
 psycopg = "^3.1.9"
 pydantic = "^2.0"
 requests = "^2.31.0"
+beautifulsoup4 = "^4.12.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -32,7 +33,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.flake8]
 accept-encodings = "utf-8"
-max-complexity = 6
+max-complexity = 5
 statistics = "False"
 max-line-length = 80
 enable-extensions = "G"
